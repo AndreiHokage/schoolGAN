@@ -1,0 +1,36 @@
+<generatorTeachers>
+    <generatorTeacher>
+        <id>Generator_Student_1</id>
+        <modelClass>GeneratorNN</modelClass>
+        <hyperParameters>
+            <hyperParameter>
+                <name>Name_Hyper_Parameter_1</name>
+                <value>Value_Hyper_Parameter_1</value>
+            </hyperParameter>
+            <hyperParameter>
+                <name>Name_Hyper_Parameter_2</name>
+                <value>Value_Hyper_Parameter_2</value>
+            </hyperParameter>
+            <hyperParameter>
+                <name>NOISE_DIM</name>
+                <value>64</value>
+            </hyperParameter>
+        </hyperParameters>
+    </generatorTeacher>
+    <generatorTeacher>
+        <id>Generator_Student_2</id>
+        <modelClass>Model_Generator_2</modelClass>
+        <hyperParameters>
+            <hyperParameter>
+                <name>Name_Hyper_Parameter_12</name>
+                <value>Value_Hyper_Parameter_12</value>
+            </hyperParameter>
+            <hyperParameter>
+                <name>Name_Hyper_Parameter_22</name>
+                <value>Value_Hyper_Parameter_22</value>
+            </hyperParameter>
+        </hyperParameters>
+    </generatorTeacher>
+</generatorTeachers>
+
+

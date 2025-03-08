@@ -1,0 +1,34 @@
+<generatorLectureClasses>
+    <generatorLectureClass>
+        <id>Generator_Lecture_Class_1</id>
+        <generatorStudentId>Generator_Student_1</generatorStudentId>
+        <discriminatorTeacherId>Discriminator_Teacher_1</discriminatorTeacherId>
+        <workingDataset>Working_Dataset_2</workingDataset>
+        <generatorTrainingAlgorithm>GEN_TRAIN_ALGO_1</generatorTrainingAlgorithm>
+        <discriminatorTrainingAlgorithm>DISC_TRAIN_ALGO_1</discriminatorTrainingAlgorithm>
+        <experimentParams>
+            <epochs>1</epochs>
+            <batchSize>8</batchSize>
+            <glearningRate>3e-4</glearningRate>
+            <dlearningRate>3e-4</dlearningRate>
+            <numChannels>3</numChannels>
+            <imageSize>32</imageSize>
+            <trainingPercentage>1.0</trainingPercentage>
+            <useExplainability>true</useExplainability>
+            <fakeLabel>0.1</fakeLabel>
+            <realLabel>0.9</realLabel>
+            <loss>BCELoss</loss>
+            <discOptimizer>Adam</discOptimizer>
+            <genOptimizer>Adam</genOptimizer>
+        </experimentParams>
+        <explanationParams>
+            <name>Saliency</name>
+            <lowPredictionScore>0.9</lowPredictionScore>
+            <weightExplanationGradient>0.2</weightExplanationGradient>
+        </explanationParams>
+        <evaluationParams>
+            <enableEvaluation>true</enableEvaluation>
+            <numEvaluationSamples>100</numEvaluationSamples>
+        </evaluationParams>
+    </generatorLectureClass>
+</generatorLectureClasses>

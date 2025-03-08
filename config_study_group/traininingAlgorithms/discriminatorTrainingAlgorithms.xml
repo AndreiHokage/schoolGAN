@@ -1,0 +1,6 @@
+<discTrainingAlgorithms>
+    <discTrainingAlgorithm>
+        <id>DISC_TRAIN_ALGO_1</id>
+        <algoName>ClassicTraining</algoName>
+    </discTrainingAlgorithm>
+</discTrainingAlgorithms>

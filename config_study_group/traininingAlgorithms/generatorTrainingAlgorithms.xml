@@ -1,0 +1,6 @@
+<genTrainingAlgorithms>
+    <genTrainingAlgorithm>
+        <id>GEN_TRAIN_ALGO_1</id>
+        <algoName>ClassicTraining</algoName>
+    </genTrainingAlgorithm>
+</genTrainingAlgorithms>

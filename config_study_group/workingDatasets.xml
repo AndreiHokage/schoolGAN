@@ -1,0 +1,24 @@
+<workingDatasets>
+    <workingDataset>
+        <id>Working_Dataset_1</id>
+        <datasetName>MNIST</datasetName>
+        <storagePath>data</storagePath>
+        <limitRawSize>100</limitRawSize>
+        <transform>
+            <imageResize>28</imageResize>
+            <normalizeMean>(0.5,)</normalizeMean>
+            <normalizeStd>(0.5,)</normalizeStd>
+        </transform>
+    </workingDataset>
+
+    <workingDataset>
+        <id>Working_Dataset_2</id>
+        <datasetName>CIFAR10</datasetName>
+        <storagePath>data</storagePath>
+        <limitRawSize>100</limitRawSize>
+        <transform>
+            <normalizeMean>(0.5, 0.5, 0.5)</normalizeMean>
+            <normalizeStd>(0.5, 0.5, 0.5)</normalizeStd>
+        </transform>
+    </workingDataset>
+</workingDatasets>
