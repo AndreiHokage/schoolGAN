@@ -17,17 +17,33 @@
             </hyperParameter>
         </hyperParameters>
     </generatorTeacher>
+
     <generatorTeacher>
         <id>Generator_Student_2</id>
-        <modelClass>Model_Generator_2</modelClass>
+        <modelClass>GeneratorDCGAN</modelClass>
         <hyperParameters>
             <hyperParameter>
-                <name>Name_Hyper_Parameter_12</name>
-                <value>Value_Hyper_Parameter_12</value>
+                <name>NOISE_DIM</name>
+                <value>64</value>
             </hyperParameter>
             <hyperParameter>
-                <name>Name_Hyper_Parameter_22</name>
-                <value>Value_Hyper_Parameter_22</value>
+                <name>FEATURES_G</name>
+                <value>64</value>
+            </hyperParameter>
+        </hyperParameters>
+    </generatorTeacher>
+
+    <generatorTeacher>
+        <id>Generator_Student_3</id>
+        <modelClass>GeneratorWGAN</modelClass>
+        <hyperParameters>
+            <hyperParameter>
+                <name>NOISE_DIM</name>
+                <value>128</value>
+            </hyperParameter>
+            <hyperParameter>
+                <name>FEATURES_G</name>
+                <value>64</value>
             </hyperParameter>
         </hyperParameters>
     </generatorTeacher>

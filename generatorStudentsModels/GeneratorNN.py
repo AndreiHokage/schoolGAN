@@ -52,7 +52,8 @@ class GeneratorNN(GeneratorStudent):
     def getOutLayer(self) -> nn.Module:
         return self.__out
 
-
+    def initialise_weights(self) -> None:
+        return
 
 
 

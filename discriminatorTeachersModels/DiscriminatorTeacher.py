@@ -17,3 +17,6 @@ class DiscriminatorTeacher(nn.Module):
     def addGeneratorStudent(self, generatorStudent: GeneratorStudent) -> None:
         self.__generatorStudentsList.append(generatorStudent)
 
+    def initialise_weights(self) -> None:
+        pass
+

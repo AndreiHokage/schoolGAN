@@ -27,7 +27,7 @@ class DeepLiftShapExplanation(ExplanationAlgorithm):
                 # convert image tensor (C, H, W) to ndarray (H, W, C)
                 image_post_explain = data_forward_expl[i, :].permute(1, 2, 0).detach().cpu().numpy()
                 # convert attribution mask tensor (1, C, H, W) to ndarray (H, W, C)
-                mask_post_explain = attributionMask.squeeze().permute(1, 2, 0).detach().cpu().numpy()
+                mask_post_explain = attributionMask.squeeze(dim=0).permute(1, 2, 0).detach().cpu().numpy()
                 self.visualiseWorstEntityThroughXAI(image_post_explain, mask_post_explain)
 
     """

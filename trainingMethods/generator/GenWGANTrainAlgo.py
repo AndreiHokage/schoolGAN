@@ -1,18 +1,17 @@
 from typing import Dict
+from xml.etree import ElementTree as ET
 
 import torch
-import torch.nn as nn
-import xml.etree.ElementTree as ET
+from torch import nn as nn
 
 from discriminatorTeachersModels.DiscriminatorTeacher import DiscriminatorTeacher
 from explanation_tools.ExplanationAlgorithm import ExplanationAlgorithm
-from explanation_tools.ExplanationUtils import ExplanationUtils
 from generatorStudentsModels.GeneratorStudent import GeneratorStudent
 from trainingMethods.generator.GeneratorTrainingAlgorithm import GeneratorTrainingAlgorithm
-from utils.tensor_utils import values_target
+from explanation_tools.ExplanationUtils import ExplanationUtils
 
 
-class GenClassicTrainAlgo(GeneratorTrainingAlgorithm):
+class GenWGANTrainAlgo(GeneratorTrainingAlgorithm):
 
     def trainGenerator(self, discriminatorTeacher: DiscriminatorTeacher, generatorStudent: GeneratorStudent, fake_data: torch.Tensor, local_explainable: bool,
                        trained_data_explanation: torch.Tensor, explanationAlgorithm: ExplanationAlgorithm,
@@ -29,11 +28,8 @@ class GenClassicTrainAlgo(GeneratorTrainingAlgorithm):
             explanationAlgorithm.extractExplanationFeatureAttr(discriminatorTeacher, fake_data, prediction, trained_data_explanation)
 
         # Calculate error and back-propagation
-        error = loss(prediction, values_target(size=(BATCH_SIZE,), value=real_label))
+        error = -torch.mean(prediction)
         error.backward()
-
-        # clip gradients to avoid exploding gradient problem
-        nn.utils.clip_grad_norm_(generatorStudent.parameters(), 10)
 
         # update parameters
         g_optim.step()

@@ -124,7 +124,7 @@ def set_deterministic_seed():
 
 if __name__ == '__main__':
     set_deterministic_seed()
-
+    #torch.autograd.set_detect_anomaly(True)
     readAllGeneratorStudentsConf()
     readAllDiscriminatorTeachersConf()
     readAllWorkingDatasets()
@@ -154,7 +154,12 @@ if __name__ == '__main__':
     print(a.shape)
     print(a)
     print(a.squeeze())
-
+    print("___III____")
+    print(torch.cuda.device_count())
+    print(torch.cuda.get_device_name(0))
+    print(get_device())
+    print(torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu")
+    print("____END_____")
     schoolGAN = SchoolGAN('generatorLectureClasses')
     schoolGAN.run()
 

@@ -20,3 +20,7 @@ class GeneratorStudent(nn.Module):
 
     def getOutLayer(self) -> nn.Module:
         pass
+
+    def initialise_weights(self) -> None:
+        pass
+

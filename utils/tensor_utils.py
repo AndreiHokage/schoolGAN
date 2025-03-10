@@ -2,7 +2,8 @@ import numpy as np
 import torch
 from matplotlib.figure import Figure
 
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+#device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
 
 def values_target(size: tuple, value: float) -> torch.Tensor:
     result = torch.full(size=size, fill_value=value).to(device=get_device())

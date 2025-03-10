@@ -5,12 +5,12 @@
         <discriminatorTeacherId>Discriminator_Teacher_3</discriminatorTeacherId>
         <workingDataset>Working_Dataset_2</workingDataset>
         <generatorTrainingAlgorithm>GEN_TRAIN_ALGO_2</generatorTrainingAlgorithm>
-        <discriminatorTrainingAlgorithm>DISC_TRAIN_ALGO_2</discriminatorTrainingAlgorithm>
+        <discriminatorTrainingAlgorithm>DISC_TRAIN_ALGO_3</discriminatorTrainingAlgorithm>
         <experimentParams>
             <epochs>100</epochs>
             <batchSize>64</batchSize>
-            <glearningRate>5e-5</glearningRate>
-            <dlearningRate>5e-5</dlearningRate>
+            <glearningRate>1e-4</glearningRate>
+            <dlearningRate>1e-4</dlearningRate>
             <numChannels>3</numChannels>
             <imageSize>64</imageSize>
             <discIterations>5</discIterations>
@@ -19,11 +19,11 @@
             <fakeLabel>0.1</fakeLabel>
             <realLabel>0.9</realLabel>
             <loss>BCELoss</loss>
-            <discOptimizer>RMSprop</discOptimizer>
-            <genOptimizer>RMSprop</genOptimizer>
+            <discOptimizer>Adam</discOptimizer>
+            <genOptimizer>Adam</genOptimizer>
         </experimentParams>
         <explanationParams>
-            <name>Saliency</name>
+            <name>Saliency</name>c
             <lowPredictionScore>0.9</lowPredictionScore>
             <weightExplanationGradient>0.6</weightExplanationGradient>
         </explanationParams>

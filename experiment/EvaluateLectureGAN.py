@@ -3,6 +3,7 @@ from itertools import count
 
 import torch
 from torcheval.metrics import FrechetInceptionDistance
+from torchvision import transforms
 from torchmetrics.image.inception import InceptionScore
 
 from generatorStudentsModels.GeneratorStudent import GeneratorStudent
@@ -13,6 +14,12 @@ from workingDatasets.WorkingDataset import WorkingDataset
 class EvaluateLectureGAN:
 
     def __computeFIDScores(self, counterfeitSamples: torch.Tensor, realSamples: torch.Tensor) -> float:
+        if counterfeitSamples.shape[1] == 1:
+            counterfeitSamples = transforms.Grayscale(num_output_channels=3)(counterfeitSamples)
+
+        if realSamples.shape[1] == 1:
+            realSamples = transforms.Grayscale(num_output_channels=3)(realSamples)
+
         fid = FrechetInceptionDistance(device=get_device())
         fid.update(counterfeitSamples, is_real=False)
         fid.update(realSamples, is_real=True)

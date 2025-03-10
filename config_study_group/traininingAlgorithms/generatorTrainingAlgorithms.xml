@@ -2,5 +2,12 @@
     <genTrainingAlgorithm>
         <id>GEN_TRAIN_ALGO_1</id>
         <algoName>ClassicTraining</algoName>
+        <paramsAlgo></paramsAlgo>
+    </genTrainingAlgorithm>
+
+    <genTrainingAlgorithm>
+        <id>GEN_TRAIN_ALGO_2</id>
+        <algoName>WGANTraining</algoName>
+        <paramsAlgo></paramsAlgo>
     </genTrainingAlgorithm>
 </genTrainingAlgorithms>

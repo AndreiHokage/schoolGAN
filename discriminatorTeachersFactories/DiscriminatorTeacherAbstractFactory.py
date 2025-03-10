@@ -17,10 +17,10 @@ class DiscriminatorTeacherAbstractFactory:
         for generatorStudentId in discriminatorTeacherXML.getGeneratorStudentsIds():
             generatorStudent = AppInstance().getCacheModels().getGeneratorStudent(generatorStudentId) # return the same reference, not a copy
             discriminatorTeacher.addGeneratorStudent(generatorStudent)
-        if id(discriminatorTeacher.getGeneratorStudents()[0]) == id(AppInstance().getCacheModels().getGeneratorStudent('Generator_Student_1')):
-            print("BALALALLALA")
-        else:
-            print("RRRRRRRRRRRRRRRRR")
+        # if id(discriminatorTeacher.getGeneratorStudents()[0]) == id(AppInstance().getCacheModels().getGeneratorStudent('Generator_Student_1')):
+        #     print("BALALALLALA")
+        # else:
+        #     print("RRRRRRRRRRRRRRRRR")
 
         return discriminatorTeacher
 

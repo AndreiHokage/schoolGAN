@@ -7,7 +7,7 @@ import torch.optim
 import torch.nn as nn
 import torchvision.utils
 from sympy import false
-from torch.optim import Optimizer, Adam
+from torch.optim import Optimizer, Adam, RMSprop
 from torch.utils.data import ConcatDataset, DataLoader, sampler
 from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms, datasets
@@ -31,7 +31,8 @@ class LectureGAN:
 
     def __init__(self, schoolGANId:str, lectureClassId: str, generatorStudent: GeneratorStudent, discriminatorTeacher: DiscriminatorTeacher, workingDataset: WorkingDataset,
                  generatorTrainingAlgo: GeneratorTrainingAlgorithm, discriminatorTrainingAlgo: DiscriminatorTrainingAlgorithm, explanationAlgorithm: ExplanationAlgorithm,
-                 experimentParams: Dict[str, ET], explanationParams: Dict[str, ET], evaluationParams: Dict[str, ET]):
+                 experimentParams: Dict[str, ET], explanationParams: Dict[str, ET], evaluationParams: Dict[str, ET],
+                 genParamsTrainAlgo: Dict[str, ET], discParamsTrainAlgo: Dict[str, ET]):
         self.__schoolGANId: str = schoolGANId
         self.__lectureClassId: str = lectureClassId
         self.__generatorStudent: GeneratorStudent = generatorStudent
@@ -41,12 +42,15 @@ class LectureGAN:
         self.__experimentParams: Dict[str, ET] = experimentParams
         self.__explanationParams: Dict[str, ET] = explanationParams
         self.__evaluationParams: Dict[str, ET] = evaluationParams
+        self.__genParamsTrainAlgo: Dict[str, ET] = genParamsTrainAlgo
+        self.__discParamsTrainAlgo: Dict[str, ET] = discParamsTrainAlgo
         self.__generatorTrainingAlgo: GeneratorTrainingAlgorithm = generatorTrainingAlgo
         self.__discTrainingAlgo: DiscriminatorTrainingAlgorithm = discriminatorTrainingAlgo
         self.__EPOCHS = int(self.__experimentParams["epochs"].text)
         self.__BATCH_SIZE = int(self.__experimentParams["batchSize"].text)
         self.__G_LEARNING_RATE = float(self.__experimentParams["glearningRate"].text)
         self.__D_LEARNING_RATE = float(self.__experimentParams["dlearningRate"].text)
+        self.__DISC_ITERATIONS = int(self.__experimentParams["discIterations"].text) if "discIterations" in self.__experimentParams.keys() else 1
         self.__IMAGE_SIZE = int(self.__experimentParams["imageSize"].text)
         self.__NUM_CHANNELS = int(self.__experimentParams["numChannels"].text)
         self.__PERCENTAGE = float(self.__experimentParams["trainingPercentage"].text)
@@ -82,11 +86,15 @@ class LectureGAN:
         optimizerType = optimizerTypeXML.text
         if optimizerType == 'Adam':
             self.__DISC_OPTIMIZER = Adam(self.__discriminatorTeacher.parameters(), self.__D_LEARNING_RATE, betas=(0.5, 0.99))
+        elif optimizerType == 'RMSprop':
+            self.__DISC_OPTIMIZER = RMSprop(self.__discriminatorTeacher.parameters(), self.__D_LEARNING_RATE)
 
     def __setupGenOptimizer(self, optimizerTypeXML: ET) -> None:
         optimizerType = optimizerTypeXML.text
         if optimizerType == 'Adam':
             self.__GEN_OPTIMIZER = Adam(self.__generatorStudent.parameters(), self.__G_LEARNING_RATE, betas=(0.5, 0.99))
+        elif optimizerType == 'RMSprop':
+            self.__GEN_OPTIMIZER = RMSprop(self.__generatorStudent.parameters(), self.__G_LEARNING_RATE)
 
     def __setupExplanationEnvLecture(self):
         ExplanationUtils.setWeightExplanationGrad(float(self.__explanationParams["weightExplanationGradient"].text))
@@ -184,16 +192,19 @@ class LectureGAN:
                 # the last batch can be smaller than the experiment config
                 BATCH_SIZE = real_batch.size(0)
 
-                # generate fake data
-                noise = self.__generatorStudent.generateNoise(batch_size=BATCH_SIZE).to(device=get_device())
-                # DETACH() is required such that to not compute the generator's gradients. If we don't detach, when we backpropagate the error for the disc
-                # the explainability hook will be invoked because the error comprises an error from the generator side as well
-                fake_data = self.__generatorStudent(noise).detach().to(device=get_device())
                 real_batch = real_batch.to(device=get_device())
 
-                # Train Discriminator
-                d_error, d_pred_real, d_pred_fake = self.__discTrainingAlgo.trainDiscriminator(self.__discriminatorTeacher, real_batch, fake_data,
-                                                                                               self.__LOSS, self.__DISC_OPTIMIZER, self.__REAL_LABEL, self.__FAKE_LABEL)
+                for _ in range(self.__DISC_ITERATIONS):
+                    # generate fake data
+                    noise = self.__generatorStudent.generateNoise(batch_size=BATCH_SIZE).to(device=get_device())
+                    # DETACH() is required such that to not compute the generator's gradients. If we don't detach, when we backpropagate the error for the disc
+                    # the explainability hook (in the second half of training) will be invoked because the error comprises an error from the generator side as well
+                    fake_data = self.__generatorStudent(noise).detach().to(device=get_device())
+
+                    # Train Discriminator
+                    d_error, d_pred_real, d_pred_fake = self.__discTrainingAlgo.trainDiscriminator(self.__discriminatorTeacher, real_batch, fake_data,
+                                                                                                   self.__LOSS, self.__DISC_OPTIMIZER, self.__REAL_LABEL, self.__FAKE_LABEL,
+                                                                                                   self.__discParamsTrainAlgo)
 
                 # generate fake data for generator
                 noise = self.__generatorStudent.generateNoise(batch_size=BATCH_SIZE).to(device=get_device())
@@ -202,7 +213,8 @@ class LectureGAN:
                 # train G
                 g_error = self.__generatorTrainingAlgo.trainGenerator(self.__discriminatorTeacher, self.__generatorStudent, fake_data, local_explainable,
                                                                       trained_data_explanation, self.__explanationAlgorithm,
-                                                                      self.__LOSS, self.__GEN_OPTIMIZER, self.__REAL_LABEL)
+                                                                      self.__LOSS, self.__GEN_OPTIMIZER, self.__REAL_LABEL,
+                                                                      self.__genParamsTrainAlgo)
 
                 # Write To Tensorboard
                 if len(loader) == 1 or (batch_idx > 0 and (batch_idx % 2 == 0 or batch_idx == len(loader) - 1)):

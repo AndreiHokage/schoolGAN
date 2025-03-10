@@ -2,5 +2,22 @@
     <discTrainingAlgorithm>
         <id>DISC_TRAIN_ALGO_1</id>
         <algoName>ClassicTraining</algoName>
+        <paramsAlgo> </paramsAlgo>
+    </discTrainingAlgorithm>
+
+    <discTrainingAlgorithm>
+        <id>DISC_TRAIN_ALGO_2</id>
+        <algoName>WGANTraining</algoName>
+        <paramsAlgo>
+            <WEIGHT_CLIP>0.01</WEIGHT_CLIP>
+        </paramsAlgo>
+    </discTrainingAlgorithm>
+
+    <discTrainingAlgorithm>
+        <id>DISC_TRAIN_ALGO_3</id>
+        <algoName>WGPTraining</algoName>
+        <paramsAlgo>
+            <LAMBDA_GP>10.0</LAMBDA_GP>
+        </paramsAlgo>
     </discTrainingAlgorithm>
 </discTrainingAlgorithms>
