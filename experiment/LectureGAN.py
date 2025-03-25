@@ -23,7 +23,7 @@ from generatorStudentsModels.GeneratorNN import GeneratorNN
 from generatorStudentsModels.GeneratorStudent import GeneratorStudent
 from trainingMethods.discriminator.DiscriminatorTrainingAlgorithm import DiscriminatorTrainingAlgorithm
 from trainingMethods.generator.GeneratorTrainingAlgorithm import GeneratorTrainingAlgorithm
-from utils.tensor_utils import get_device, normalise_tensor_uint8
+from utils.tensor_utils import get_device, normalise_tensor_uint8, save_01Elems_as_Image, resetDirectory, device
 from workingDatasets.WorkingDataset import WorkingDataset
 
 
@@ -54,10 +54,10 @@ class LectureGAN:
         self.__IMAGE_SIZE = int(self.__experimentParams["imageSize"].text)
         self.__NUM_CHANNELS = int(self.__experimentParams["numChannels"].text)
         self.__PERCENTAGE = float(self.__experimentParams["trainingPercentage"].text)
-        self.__USE_EXPLAINABILITY = bool(self.__experimentParams["useExplainability"].text)
+        self.__USE_EXPLAINABILITY = eval(self.__experimentParams["useExplainability"].text)
         self.__FAKE_LABEL = float(self.__experimentParams["fakeLabel"].text)
         self.__REAL_LABEL = float(self.__experimentParams["realLabel"].text)
-        self.__ENABLE_EVAL = bool(self.__evaluationParams["enableEvaluation"].text)
+        self.__ENABLE_EVAL = eval(self.__evaluationParams["enableEvaluation"].text)
         self.__NUM_EVAL_SAMPLES = int(self.__evaluationParams["numEvaluationSamples"].text)
         self.__LOSS: nn.Module = None
         self.__GEN_OPTIMIZER = None
@@ -66,21 +66,25 @@ class LectureGAN:
         self.__setupLoss(self.__experimentParams["loss"])
         self.__setupGenOptimizer(self.__experimentParams["genOptimizer"])
         self.__setupDiscOptimizer(self.__experimentParams["discOptimizer"])
-        self.__setupExplanationEnvLecture()
 
         self.__writer_real = SummaryWriter(os.path.join('logs', self.__schoolGANId, self.__lectureClassId, "real"))
         self.__writer_fake = SummaryWriter(os.path.join('logs', self.__schoolGANId, self.__lectureClassId, "fake"))
         self.__writer_loss = SummaryWriter(os.path.join('logs', self.__schoolGANId, self.__lectureClassId, "loss"))
 
+        # overwrite the pth files to empty ones
         self.__setupDirectoriesForSavingModels()
-
-        self.__results_path = os.path.join('results', self.__schoolGANId, self.__lectureClassId)
-        os.makedirs(self.__results_path, exist_ok=True)
+        # Reset the results directories.
+        # TO DO: If the running model is just loaded, make a mechanism to skip this step to prevent losing the metrics
+        self.__setupDirectoriesForSavingResults()
 
     def __setupLoss(self, lossTypeXML: ET) -> None:
         lossType = lossTypeXML.text
         if lossType == 'BCELoss':
             self.__LOSS = nn.BCELoss().to(device=get_device())
+        elif lossType == 'BCEWithLogitsLoss':
+            self.__LOSS = nn.BCEWithLogitsLoss().to(device=get_device())
+        elif lossType == 'MSELoss':
+            self.__LOSS = nn.MSELoss().to(device=get_device())
 
     def __setupDiscOptimizer(self, optimizerTypeXML: ET) -> None:
         optimizerType = optimizerTypeXML.text
@@ -114,6 +118,34 @@ class LectureGAN:
         with open(self.__saving_last_model_path_file, "w") as f:
             pass
 
+    def getSavedLastModelPath(self) ->str:
+        return self.__saving_last_model_path_file
+
+    def getSavedBestModelPath(self) -> str:
+        return self.__saving_best_model_path_file
+
+    def __setupDirectoriesForSavingResults(self):
+        self.__results_path = os.path.join('results', self.__schoolGANId, self.__lectureClassId)
+        resetDirectory(self.__results_path)
+
+        self.__results_path_saving_images_counterfeit = os.path.join(self.__results_path, 'counterfeitLast')
+        resetDirectory(self.__results_path_saving_images_counterfeit)
+
+        self.__results_path_saving_images_best = os.path.join(self.__results_path, 'counterfeitBest')
+        resetDirectory(self.__results_path_saving_images_best)
+
+        self.__results_path_saving_images_real = os.path.join(self.__results_path, 'realImages')
+        resetDirectory(self.__results_path_saving_images_real)
+
+    def getLectureClassId(self) -> str:
+        return self.__lectureClassId
+
+    def getBatchSize(self) -> int:
+        return self.__BATCH_SIZE
+
+    def setBatchSize(self, batchSize: int) -> None:
+        self.__batchSize = batchSize
+
     def getGeneratorStudent(self) -> GeneratorStudent:
         return self.__generatorStudent
 
@@ -125,31 +157,45 @@ class LectureGAN:
         evaluateLectureGAN = EvaluateLectureGAN()
 
         realSamples = self.__workingDataset.generateRealSamples(self.__NUM_EVAL_SAMPLES)
+        save_01Elems_as_Image(realSamples, os.path.join(self.__results_path, 'realImages'))
         self.__generatorStudent.eval()
         counterfeitSamples = self.__generatorStudent.generateCounterfeitSamples(self.__NUM_EVAL_SAMPLES, normalizing="01")
+        save_01Elems_as_Image(counterfeitSamples, self.__results_path_saving_images_counterfeit)
         self.__generatorStudent.train()
 
-        fidLastEpoch = evaluateLectureGAN.evaluateFIDScoresDataProvided(counterfeitSamples, realSamples)
+        #fidLastEpoch = evaluateLectureGAN.evaluateFIDScoresDataProvided(counterfeitSamples, realSamples)
         #isLastEpoch = evaluateLectureGAN.evaluateISScoreDataProvided(normalise_tensor_uint8(counterfeitSamples))
 
         # deepcopy = preserving the original state of the original generator
-        best_epoch_generator = deepcopy(self.__generatorStudent).to(device=get_device())
-        best_epoch_generator.load_state_dict(torch.load(self.__saving_best_model_path_file, map_location=get_device()))
-        best_epoch_generator.eval()
-        counterfeitSamplesBestEpoch = best_epoch_generator.generateCounterfeitSamples(self.__NUM_EVAL_SAMPLES, normalizing="01")
+        # BEST MODEL
+        # best_epoch_generator = deepcopy(self.__generatorStudent).to(device=get_device())
+        # best_epoch_generator.load_state_dict(torch.load(self.__saving_best_model_path_file, map_location=get_device()))
+        # best_epoch_generator.eval()
+        # counterfeitSamplesBestEpoch = best_epoch_generator.generateCounterfeitSamples(self.__NUM_EVAL_SAMPLES, normalizing="01")
+        # save_01Elems_as_Image(counterfeitSamplesBestEpoch, self.__results_path_saving_images_best)
 
-        fidBestEpoch = evaluateLectureGAN.evaluateFIDScoresDataProvided(counterfeitSamplesBestEpoch, realSamples)
+        #fidBestEpoch = evaluateLectureGAN.evaluateFIDScoresDataProvided(counterfeitSamplesBestEpoch, realSamples)
         #isBestEpoch = evaluateLectureGAN.evaluateISScoreDataProvided(normalise_tensor_uint8(counterfeitSamplesBestEpoch))
 
         with open(os.path.join(self.__results_path, 'scores.txt'), "w") as f:
-            f.write(f"FID last epoch: {fidLastEpoch}\n")
+            pass
+            #f.write(f"FID last epoch: {fidLastEpoch}\n")
             #f.write(f"IS last epoch: {isLastEpoch}\n")
-            f.write(f"FID best epoch: {fidBestEpoch}\n")
+            #f.write(f"FID best epoch: {fidBestEpoch}\n")
             #f.write(f"IS best epoch: {isBestEpoch}\n")
 
-        del best_epoch_generator
+        # del best_epoch_generator
+        del counterfeitSamples
+        # del counterfeitSamplesBestEpoch
 
     def runExperiment(self):
+        # due to everything in ExplanationUtils is static, we cannot make the call of the method in the constructor because we are initialise
+        # every lecture class from the beginning. So, ExplanationUtils state is going to be overrode by each new instance of LectureGAN
+        # Due to we run each LectureGAN sequentially, we initialise the explanation env when we run the training process. This solution had to be considered
+        # when we had that code version where we set up all the lectures classes, put them into a list and iterate through them to start training
+        if self.__USE_EXPLAINABILITY:
+            self.__setupExplanationEnvLecture()
+
         # EPOCHS = 4 -> explainability_kick_in = 2; EPOCHS = 5 -> explainability_kick_in = 3
         explanationSwitch = (self.__EPOCHS + 1) // 2 if self.__EPOCHS % 2 == 1 else self.__EPOCHS // 2
 
@@ -253,10 +299,20 @@ class LectureGAN:
             self.__evaluateLectureClass()
 
     def __saveGenerativeModel(self):
-        torch.save(self.__generatorStudent.state_dict(), self.__saving_best_model_path_file)
+        pass
+        #torch.save(self.__generatorStudent.state_dict(), self.__saving_best_model_path_file)
 
     def __saveGenerativeModelLastEpoch(self):
         torch.save(self.__generatorStudent.state_dict(), self.__saving_last_model_path_file)
 
+    def freeUpLectureClass(self):
+        del self.__generatorStudent
+        del self.__discriminatorTeacher
+        del self.__workingDataset
+        del self.__experimentParams
+        del self.__explanationParams
+        del self.__evaluationParams
+        del self.__genParamsTrainAlgo
+        del self.__discParamsTrainAlgo
 
 

@@ -1,6 +1,10 @@
+import os.path
+import shutil
+
 import numpy as np
 import torch
 from matplotlib.figure import Figure
+from PIL import Image
 
 #device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
@@ -32,4 +36,41 @@ def normalise_tensor_uint8(vector: torch.Tensor) -> torch.Tensor:
     vector = vector * 255
     vector = vector.to(torch.uint8)
     return vector
+
+'''
+counterfeitImages: shape [N, C, H, W] normalised in [-1, 1]
+'''
+def save_tanhElems_as_Image(counterfeitImages: torch.Tensor, savingPath: str) -> None:
+    N = counterfeitImages.shape[0]
+    for i in range(N):
+        sample = counterfeitImages[i]
+        sample = np.transpose(sample, (1, 2, 0))
+        sample = ((sample / 2) + 0.5) * 255
+        sample = sample.astype(np.uint8)
+        image = Image.fromarray(sample)
+        image.save(f'{savingPath}/{i}.jpg')
+
+'''
+realImages: shape [N, C, H, W] normalised in [0, 1]
+'''
+def save_01Elems_as_Image(realImages: torch.Tensor, savingPath: str) -> None:
+    N = realImages.shape[0]
+    for i in range(N):
+        sample = realImages[i].detach().cpu().numpy()
+        sample = np.transpose(sample, (1, 2, 0))
+        sample = sample * 255
+        sample = sample.astype(np.uint8)
+        image = Image.fromarray(sample)
+        image.save(f'{savingPath}/{i}.jpg')
+
+def resetDirectory(pathDir: str) -> None:
+    if os.path.exists(pathDir) and os.path.isdir(pathDir):
+        try:
+            shutil.rmtree(pathDir)
+            print(f"The directory '{pathDir}' has been deleted successfully.")
+        except Exception as e:
+            print(f"Failed to delete the directory: {e}")
+    os.makedirs(pathDir, exist_ok=True)
+
+
 

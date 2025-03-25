@@ -3,14 +3,7 @@
         <id>Discriminator_Teacher_1</id>
         <modelClass>DiscriminatorNN</modelClass>
         <hyperParameters>
-            <hyperParameter>
-                <name>Name_Hyper_Parameter_1</name>
-                <value>Value_Hyper_Parameter_1</value>
-            </hyperParameter>
-            <hyperParameter>
-                <name>Name_Hyper_Parameter_2</name>
-                <value>Value_Hyper_Parameter_2</value>
-            </hyperParameter>
+
         </hyperParameters>
         <generatorStudents>
             <generatorStudent>
@@ -26,10 +19,6 @@
             <hyperParameter>
                 <name>FEATURES_D</name>
                 <value>64</value>
-            </hyperParameter>
-            <hyperParameter>
-                <name>Name_Hyper_Parameter_22</name>
-                <value>Value_Hyper_Parameter_22</value>
             </hyperParameter>
         </hyperParameters>
         <generatorStudents>
@@ -47,14 +36,10 @@
                 <name>FEATURES_D</name>
                 <value>64</value>
             </hyperParameter>
-            <hyperParameter>
-                <name>Name_Hyper_Parameter_22</name>
-                <value>Value_Hyper_Parameter_22</value>
-            </hyperParameter>
         </hyperParameters>
         <generatorStudents>
             <generatorStudent>
-                <id>Generator_Student_3</id>
+                <id>Generator_Team_1</id>
             </generatorStudent>
         </generatorStudents>
     </discriminatorTeacher>

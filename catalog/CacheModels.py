@@ -13,13 +13,15 @@ class CacheModels:
         self.__lookupCacheDiscriminatorTeachers: Dict[str, DiscriminatorTeacher] = {}
 
     def addGeneratorStudent(self, modelId: str, model: GeneratorStudent) -> None:
-        self.__lookupCacheGeneratorStudents[modelId] = model # makes an assigment, not a copy !!!!!!
+        pass
+        #self.__lookupCacheGeneratorStudents[modelId] = model # makes an assigment, not a copy !!!!!!
 
     def getGeneratorStudent(self, modelId: str) -> GeneratorStudent:
         return self.__lookupCacheGeneratorStudents[modelId]
 
     def addDiscriminatorTeacher(self, modelId: str, model: DiscriminatorTeacher) -> None:
-        self.__lookupCacheDiscriminatorTeachers[modelId] = model
+        pass
+        #self.__lookupCacheDiscriminatorTeachers[modelId] = model
 
     def getDiscriminatorTeacher(self, modelId: str) -> DiscriminatorTeacher:
         return self.__lookupCacheDiscriminatorTeachers[modelId]

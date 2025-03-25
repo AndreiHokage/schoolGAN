@@ -9,6 +9,7 @@ from discriminatorTeachersFactories.DiscriminatorTeacherAbstractFactory import D
 from discriminatorTeachersFactories.DiscriminatorWGANFactory import DiscriminatorWGANFactory
 from discriminatorTeachersModels.DiscriminatorTeacher import DiscriminatorTeacher
 from experiment.LectureGAN import LectureGAN
+from experiment.ReviveGenModel import ReviveGenModel
 from explanation_tools.DeepLiftShapExplanation import DeepLiftShapExplanation
 from explanation_tools.ExplanationAlgorithm import ExplanationAlgorithm
 from explanation_tools.LimeExplanation import LimeExplanation
@@ -18,6 +19,10 @@ from generatorStudentsFactories.GeneratorNNFactory import GeneratorNNFactory
 from generatorStudentsFactories.GeneratorStudentAbstractFactory import GeneratorStudentAbstractFactory
 from generatorStudentsFactories.GeneratorWGANFactory import GeneratorWGANFactory
 from generatorStudentsModels import GeneratorStudent
+from generatorTeamFactories import GeneratorTeamAbstractFactory
+from generatorTeamFactories.GeneratorDCGANTeamFactory import GeneratorDCGANTeamFactory
+from generatorTeamFactories.GeneratorUNETTeamFactory import GeneratorUNETTeamFactory
+from generatorTeamModels import GeneratorTeam
 from trainingMethods.discriminator.DiscriminatorTrainingAlgorithm import DiscriminatorTrainingAlgorithm
 from trainingMethods.discriminator.factories.DiscClassicTrainAlgoFactory import DiscClassicTrainAlgoFactory
 from trainingMethods.discriminator.factories.DiscTrainAlgoAbstractFactory import DiscTrainAlgoAbstractFactory
@@ -40,24 +45,67 @@ class SchoolGAN:
     def __init__(self, schoolGANFilename):
         self.__schoolGANFilename: str = schoolGANFilename
         self.__configFilePathXML: str = os.path.join('./config_study_group/config_school/', schoolGANFilename + '.xml')
-        self.__lectureClasses: List[LectureGAN] = []
-        self.__setup()
+        self.__reviveGenModelList: List[ReviveGenModel] = []
 
-    def __setup(self):
+    def run(self):
         root = ET.parse(self.__configFilePathXML).getroot()
         for generatorLectureClass in root.findall('generatorLectureClass'):
             ganLectureClassXML = GANLectureClassXML(generatorLectureClass)
-            generatorStudent = self.__createGeneratorStudent(ganLectureClassXML.getGeneratorStudentId(), ganLectureClassXML.getExperimentParameters())
+
+            if ganLectureClassXML.isTeam() == True:
+                continue
+
+            lectureClassId: str = ganLectureClassXML.getId()
+            saving_best_model_path = os.path.join('saving_models', self.__schoolGANFilename)
+            saving_best_model_path_file = os.path.join(saving_best_model_path, 'best_' + lectureClassId + '.pth')
+            saving_last_model_path_file = os.path.join(saving_best_model_path, 'last_' + lectureClassId + '.pth')
+            if not self.__isAnExistingAndTrainedModel(saving_last_model_path_file):
+                generatorStudent = self.__createGeneratorStudent(ganLectureClassXML.getGeneratorStudentId(), ganLectureClassXML.getExperimentParameters())
+                discriminatorTeacher = self.__createDiscriminatorTeacher(ganLectureClassXML.getDiscriminatorTeacherId(), ganLectureClassXML.getExperimentParameters())
+                workingDataset = self.__createWorkingDataset(ganLectureClassXML.getWorkingDatasetId(), ganLectureClassXML.getExperimentParameters())
+                genTrainingAlgo, genParamsTrainAlgo = self.__instantiateGenTrainingAlgo(ganLectureClassXML.getGenTrainingAlgo())
+                discriminatorTrainingAlgo, discParamsTrainAlgo = self.__instantiateDiscTrainingAlgo(ganLectureClassXML.getDiscTrainingAlgo())
+                explanationAlgorithm = self.__createExplanationAlgorithm(ganLectureClassXML.getExplanationParameters())
+                lectureGan = LectureGAN(self.__schoolGANFilename, lectureClassId, generatorStudent, discriminatorTeacher, workingDataset, genTrainingAlgo, discriminatorTrainingAlgo,
+                                        explanationAlgorithm, ganLectureClassXML.getExperimentParameters(), ganLectureClassXML.getExplanationParameters(),
+                                        ganLectureClassXML.getEvaluationParameters(), genParamsTrainAlgo, discParamsTrainAlgo)
+
+                print("NEW >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> RUN: " + lectureGan.getLectureClassId())
+                lectureGan.runExperiment()
+                lectureGan.freeUpLectureClass()
+                del lectureGan
+            else:
+                print("IMPORT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> : " + saving_best_model_path_file + " ; " + saving_last_model_path_file)
+
+            templateGeneratorStudent = self.__createGeneratorStudent(ganLectureClassXML.getGeneratorStudentId(), ganLectureClassXML.getExperimentParameters())
+            self.__reviveGenModelList.append(ReviveGenModel(templateGeneratorStudent,
+                                                         saving_last_model_path_file,
+                                                         saving_best_model_path_file))
+
+        for generatorLectureClass in root.findall('generatorLectureClass'):
+            ganLectureClassXML = GANLectureClassXML(generatorLectureClass)
+            if ganLectureClassXML.isTeam() == False:
+                continue
+
+            print("generatorLectureClass is LEADER >>>>>>>>>>>>>>>> Team Generator model run training")
+            # Although it is a generatorTeam, in the lecture class xml conf file the only way we make reference to the generator is through the id.
+            # The id of the generator team is the same with the id of generator student
+            generatorTeam = self.__createGeneratorTeam(ganLectureClassXML, ganLectureClassXML.getExperimentParameters())
             discriminatorTeacher = self.__createDiscriminatorTeacher(ganLectureClassXML.getDiscriminatorTeacherId(), ganLectureClassXML.getExperimentParameters())
             workingDataset = self.__createWorkingDataset(ganLectureClassXML.getWorkingDatasetId(), ganLectureClassXML.getExperimentParameters())
             genTrainingAlgo, genParamsTrainAlgo = self.__instantiateGenTrainingAlgo(ganLectureClassXML.getGenTrainingAlgo())
             discriminatorTrainingAlgo, discParamsTrainAlgo = self.__instantiateDiscTrainingAlgo(ganLectureClassXML.getDiscTrainingAlgo())
             explanationAlgorithm = self.__createExplanationAlgorithm(ganLectureClassXML.getExplanationParameters())
             lectureClassId: str = ganLectureClassXML.getId()
-            lectureGan = LectureGAN(self.__schoolGANFilename, lectureClassId, generatorStudent, discriminatorTeacher, workingDataset, genTrainingAlgo, discriminatorTrainingAlgo,
+            lectureTeamGan = LectureGAN(self.__schoolGANFilename, lectureClassId, generatorTeam, discriminatorTeacher, workingDataset, genTrainingAlgo, discriminatorTrainingAlgo,
                                     explanationAlgorithm, ganLectureClassXML.getExperimentParameters(), ganLectureClassXML.getExplanationParameters(),
                                     ganLectureClassXML.getEvaluationParameters(), genParamsTrainAlgo, discParamsTrainAlgo)
-            self.__lectureClasses.append(lectureGan)
+
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Run BOSSS")
+            lectureTeamGan.runExperiment()
+
+    def __isAnExistingAndTrainedModel(self, saving_last_model_path_file):
+        return os.path.exists(saving_last_model_path_file)
 
     def __createGeneratorStudent(self, generatorStudentId: str, experimentLevelParams: Dict[str, ET]) -> GeneratorStudent:
         generatorStudentXML = AppInstance().getCatalogueEntities().getGeneratorStudentXMLById(generatorStudentId)
@@ -77,6 +125,33 @@ class SchoolGAN:
         generatorStudent.initialise_weights()
         AppInstance().getCacheModels().addGeneratorStudent(generatorStudentId, generatorStudent)
         return generatorStudent
+
+    def __createGeneratorTeam(self, ganLectureClassXML: GANLectureClassXML, experimentLevelParams: Dict[str, ET]) -> GeneratorTeam:
+        generatorTeamId = ganLectureClassXML.getGeneratorStudentId()
+        generatorTeamXML = AppInstance().getCatalogueEntities().getGeneratorTeamXMLById(generatorTeamId)
+        modelName = generatorTeamXML.getModelName()
+
+        generatorTeamConcreteFactory: GeneratorTeamAbstractFactory = None
+        if modelName == 'GeneratorUNETTeam':
+            generatorTeamConcreteFactory = GeneratorUNETTeamFactory()
+        elif modelName == 'GeneratorDCGANTeam':
+            generatorTeamConcreteFactory = GeneratorDCGANTeamFactory()
+        else:
+            raise Exception("No specified type for team generator")
+
+        explicitGenModelList: List[ReviveGenModel] = []
+        for (genId, saving_last_model_path_file, saving_best_model_path_file) in ganLectureClassXML.getAdditionalMembers():
+            # WARNING: Push the experimentLevelParams of the Leader Entity, not of each student generator individually
+            templateGeneratorStudent = self.__createGeneratorStudent(genId, experimentLevelParams)
+            explicitGenModelList.append(ReviveGenModel(templateGeneratorStudent,
+                                                            saving_last_model_path_file,
+                                                            saving_best_model_path_file))
+
+        generatorTeam = generatorTeamConcreteFactory.createModel(self.__reviveGenModelList + explicitGenModelList, generatorTeamXML, experimentLevelParams).to(device=get_device())
+        generatorTeam.setUpGenerationTeam()
+        generatorTeam.initialise_weights()
+        AppInstance().getCacheModels().addGeneratorStudent(generatorTeamId, generatorTeam)
+        return generatorTeam
 
     def __createDiscriminatorTeacher(self, discriminatorTeacherId: str, experimentLevelParams: Dict[str, ET]) -> DiscriminatorTeacher:
         discriminatorTeacherXml = AppInstance().getCatalogueEntities().getDiscriminatorTeacherXMLById(discriminatorTeacherId)
@@ -167,11 +242,13 @@ class SchoolGAN:
 
         return explanationAlgorithm
 
-    def run(self):
-        for lectureClass in self.__lectureClasses:
-            lectureClass.runExperiment()
-
-
-
+    # def run(self):
+    #     for lectureClass in self.__lectureClasses:
+    #         print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> RUN: " + lectureClass.getLectureClassId())
+    #         lectureClass.runExperiment()
+    #         lectureClass.freeUpLectureClass()
+    #
+    #     print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Run BOSSS")
+    #     self.__lectureTeam.runExperiment()
 
 

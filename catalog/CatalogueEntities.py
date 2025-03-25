@@ -4,6 +4,7 @@ from xmlComponents.DiscTrainAlgoXML import DiscTrainAlgoXML
 from xmlComponents.DiscriminatorTeacherXML import DiscriminatorTeacherXML
 from xmlComponents.GenTrainAlgoXML import GenTrainAlgoXML
 from xmlComponents.GeneratorStudentXML import GeneratorStudentXML
+from xmlComponents.GeneratorTeamXML import GeneratorTeamXML
 from xmlComponents.WorkingDatasetXML import WorkingDatasetXML
 
 
@@ -11,6 +12,7 @@ class CatalogueEntities:
 
     def __init__(self):
         self.__generatorsStudentsXMLCatalog: Dict[str, GeneratorStudentXML] = {}
+        self.__generatorsTeamsXMLCatalog: Dict[str, GeneratorTeamXML] = {}
         self.__discriminatorTeachersXMLCatalog: Dict[str, DiscriminatorTeacherXML] = {}
         self.__workingDatasetsXMLCatalog: Dict[str, WorkingDatasetXML] = {}
         self.__discTrainAlgosCatalog: Dict[str, DiscTrainAlgoXML] = {}
@@ -19,17 +21,26 @@ class CatalogueEntities:
     def getGeneratorsStudentsXMLCatalog(self) -> Dict[str, GeneratorStudentXML]:
         return self.__generatorsStudentsXMLCatalog
 
+    def getGeneratorsTeamsXMLCatalog(self) -> Dict[str, GeneratorTeamXML]:
+        return self.__generatorsTeamsXMLCatalog
+
     def getDiscriminatorTeachersXMLCatalog(self) -> Dict[str, DiscriminatorTeacherXML]:
         return self.__discriminatorTeachersXMLCatalog
 
     def getGeneratorStudentXMLById(self, generatorStudentId: str) -> GeneratorStudentXML:
         return self.__generatorsStudentsXMLCatalog[generatorStudentId]
 
+    def getGeneratorTeamXMLById(self, generatorTeamId: str) -> GeneratorTeamXML:
+        return self.__generatorsTeamsXMLCatalog[generatorTeamId]
+
     def getDiscriminatorTeacherXMLById(self, discriminatorTeacherId: str) -> DiscriminatorTeacherXML:
         return self.__discriminatorTeachersXMLCatalog[discriminatorTeacherId]
 
     def addGeneratorStudentXML(self, generatorStudentId: str, generatorStudentXML: GeneratorStudentXML) -> None:
         self.__generatorsStudentsXMLCatalog[generatorStudentId] = generatorStudentXML
+
+    def addGeneratorTeamXML(self, generatorTeamId: str, generatorTeamXML: GeneratorTeamXML) -> None:
+        self.__generatorsTeamsXMLCatalog[generatorTeamId] = generatorTeamXML
 
     def addDiscriminatorTeacherXML(self, discriminatorTeacherId: str, discriminatorTeacherXML: DiscriminatorTeacherXML) -> None:
         self.__discriminatorTeachersXMLCatalog[discriminatorTeacherId] = discriminatorTeacherXML

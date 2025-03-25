@@ -1,16 +1,17 @@
 <generatorLectureClasses>
+    <!--Student 1-->
     <generatorLectureClass>
-        <id>Generator_Lecture_Class_2</id>
-        <generatorStudentId>Generator_Student_3</generatorStudentId>
-        <discriminatorTeacherId>Discriminator_Teacher_3</discriminatorTeacherId>
+        <id>Generator_Lecture_Class_1</id>
+        <generatorStudentId>Generator_Student_1</generatorStudentId>
+        <discriminatorTeacherId>Discriminator_Teacher_1</discriminatorTeacherId>
         <workingDataset>Working_Dataset_2</workingDataset>
-        <generatorTrainingAlgorithm>GEN_TRAIN_ALGO_2</generatorTrainingAlgorithm>
-        <discriminatorTrainingAlgorithm>DISC_TRAIN_ALGO_2</discriminatorTrainingAlgorithm>
+        <generatorTrainingAlgorithm>GEN_TRAIN_ALGO_1</generatorTrainingAlgorithm>
+        <discriminatorTrainingAlgorithm>DISC_TRAIN_ALGO_1</discriminatorTrainingAlgorithm>
         <experimentParams>
-            <epochs>100</epochs>
+            <epochs>5</epochs>
             <batchSize>64</batchSize>
-            <glearningRate>5e-5</glearningRate>
-            <dlearningRate>5e-5</dlearningRate>
+            <glearningRate>3e-4</glearningRate>
+            <dlearningRate>3e-4</dlearningRate>
             <numChannels>3</numChannels>
             <imageSize>64</imageSize>
             <discIterations>5</discIterations>
@@ -19,8 +20,8 @@
             <fakeLabel>0.1</fakeLabel>
             <realLabel>0.9</realLabel>
             <loss>BCELoss</loss>
-            <discOptimizer>RMSprop</discOptimizer>
-            <genOptimizer>RMSprop</genOptimizer>
+            <discOptimizer>Adam</discOptimizer>
+            <genOptimizer>Adam</genOptimizer>
         </experimentParams>
         <explanationParams>
             <name>Saliency</name>
@@ -33,20 +34,55 @@
         </evaluationParams>
     </generatorLectureClass>
 
-
+    <!-- Student 2 -->
     <generatorLectureClass>
         <id>Generator_Lecture_Class_2</id>
+        <generatorStudentId>Generator_Student_2</generatorStudentId>
+        <discriminatorTeacherId>Discriminator_Teacher_2</discriminatorTeacherId>
+        <workingDataset>Working_Dataset_2</workingDataset>
+        <generatorTrainingAlgorithm>GEN_TRAIN_ALGO_1</generatorTrainingAlgorithm>
+        <discriminatorTrainingAlgorithm>DISC_TRAIN_ALGO_1</discriminatorTrainingAlgorithm>
+        <experimentParams>
+            <epochs>5</epochs>
+            <batchSize>64</batchSize>
+            <glearningRate>2e-4</glearningRate>
+            <dlearningRate>2e-4</dlearningRate>
+            <numChannels>3</numChannels>
+            <imageSize>64</imageSize>
+            <discIterations>5</discIterations>
+            <trainingPercentage>1.0</trainingPercentage>
+            <useExplainability>true</useExplainability>
+            <fakeLabel>0.1</fakeLabel>
+            <realLabel>0.9</realLabel>
+            <loss>BCELoss</loss>
+            <discOptimizer>Adam</discOptimizer>
+            <genOptimizer>Adam</genOptimizer>
+        </experimentParams>
+        <explanationParams>
+            <name>Lime</name>
+            <lowPredictionScore>0.9</lowPredictionScore>
+            <weightExplanationGradient>0.6</weightExplanationGradient>
+        </explanationParams>
+        <evaluationParams>
+            <enableEvaluation>true</enableEvaluation>
+            <numEvaluationSamples>100</numEvaluationSamples>
+        </evaluationParams>
+    </generatorLectureClass>
+
+    <!-- Team -->
+    <generatorLectureClass>
+        <id>Generator_Lecture_Team_1</id>
         <isTeam>true</isTeam>
-        <generatorStudentId>Generator_Student_3</generatorStudentId>
+        <generatorStudentId>Generator_Team_1</generatorStudentId>
         <discriminatorTeacherId>Discriminator_Teacher_3</discriminatorTeacherId>
         <workingDataset>Working_Dataset_2</workingDataset>
         <generatorTrainingAlgorithm>GEN_TRAIN_ALGO_2</generatorTrainingAlgorithm>
         <discriminatorTrainingAlgorithm>DISC_TRAIN_ALGO_2</discriminatorTrainingAlgorithm>
         <teamParams>
-            <batchSizesDistribution>(16, 16,)</batchSizesDistribution>
+
         </teamParams>
         <experimentParams>
-            <epochs>100</epochs>
+            <epochs>5</epochs>
             <batchSize>64</batchSize>
             <glearningRate>5e-5</glearningRate>
             <dlearningRate>5e-5</dlearningRate>
@@ -62,7 +98,7 @@
             <genOptimizer>RMSprop</genOptimizer>
         </experimentParams>
         <explanationParams>
-            <name>Saliency</name>
+            <name>Lime</name>
             <lowPredictionScore>0.9</lowPredictionScore>
             <weightExplanationGradient>0.6</weightExplanationGradient>
         </explanationParams>

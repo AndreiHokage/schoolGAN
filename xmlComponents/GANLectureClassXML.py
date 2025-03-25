@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, List, Tuple
 import xml.etree.ElementTree as ET
 
 
@@ -6,6 +6,8 @@ class GANLectureClassXML:
 
     def __init__(self, xmlRoot: ET):
         self.__id: str = ""
+        self.__isTeam: bool = False
+        self.__teamParams: Dict[str, ET] = {}
         self.__generatorStudentId: str = ""
         self.__discriminatorTeacherId: str = ""
         self.__workingDatasetId: str = ""
@@ -14,6 +16,7 @@ class GANLectureClassXML:
         self.__experimentParams: Dict[str, ET] = {}
         self.__explanationParams: Dict[str, ET] = {}
         self.__evaluationParams: Dict[str, ET] = {}
+        self.__additionalMembers: List[Tuple[str, str, str]] = []
         self.__buildGeneratorComponent(xmlRoot)
 
     def __buildGeneratorComponent(self, root: ET) -> None:
@@ -36,8 +39,27 @@ class GANLectureClassXML:
             xmlTag = str(evaluationParam.tag)
             self.__evaluationParams[xmlTag] = evaluationParam
 
+        if root.find('isTeam') is not None:
+            self.__isTeam = bool(root.find('isTeam').text)
+            if self.__isTeam:
+                # for teamParam in root.find('teamParams'):
+                #     xmlTag = str(teamParam.tag)
+                #     self.__teamParams[xmlTag] = teamParam
+                for memberParam in root.find('teamParams').find('additionalMembers').findall('member'):
+                    generatorId = memberParam.find('generatorId').text
+                    savingLastPath = memberParam.find('savingLastPath').text
+                    if savingLastPath == None:
+                        savingLastPath = ""
+                    savingBestPath = memberParam.find('savingBestPath').text
+                    if savingBestPath == None:
+                        savingBestPath = ""
+                    self.__additionalMembers.append((generatorId, savingLastPath, savingBestPath))
+
     def getId(self) -> str:
         return self.__id
+
+    def isTeam(self) -> bool:
+        return self.__isTeam
 
     def getGeneratorStudentId(self) -> str:
         return self.__generatorStudentId
@@ -78,6 +100,15 @@ class GANLectureClassXML:
             return None
         return self.__evaluationParams[evaluationParameterName]
 
+    def getTeamParameters(self) -> Dict[str, ET]:
+        return self.__teamParams
 
+    def getTeamParameterValue(self, teamParameterName: str) -> ET:
+        if not teamParameterName in self.__teamParams.keys():
+            return None
+        return self.__teamParams[teamParameterName]
+
+    def getAdditionalMembers(self) -> List[Tuple[str, str, str]]:
+        return self.__additionalMembers
 
 

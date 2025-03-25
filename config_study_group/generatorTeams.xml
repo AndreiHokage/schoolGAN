@@ -1,0 +1,42 @@
+<generatorTeams>
+    <generatorTeam>
+        <id>Generator_Team_1</id>
+        <modelClass>GeneratorUNETTeam</modelClass>
+        <hyperParameters>
+            <hyperParameter>
+                <name>Name_Hyper_Parameter_1</name>
+                <value>Value_Hyper_Parameter_1</value>
+            </hyperParameter>
+            <hyperParameter>
+                <name>Name_Hyper_Parameter_2</name>
+                <value>Value_Hyper_Parameter_2</value>
+            </hyperParameter>
+            <hyperParameter>
+                <name>FEATURES_G</name>
+                <value>64</value>
+            </hyperParameter>
+        </hyperParameters>
+    </generatorTeam>
+
+    <generatorTeam>
+        <id>Generator_Team_2</id>
+        <modelClass>GeneratorDCGANTeam</modelClass>
+        <hyperParameters>
+            <hyperParameter>
+                <name>FEATURES_G</name>
+                <value>64</value>
+            </hyperParameter>
+        </hyperParameters>
+    </generatorTeam>
+
+    <generatorTeam>
+        <id>Generator_Team_3</id>
+        <modelClass>GeneratorDCGANTeam</modelClass>
+        <hyperParameters>
+            <hyperParameter>
+                <name>FEATURES_G</name>
+                <value>128</value>
+            </hyperParameter>
+        </hyperParameters>
+    </generatorTeam>
+</generatorTeams>

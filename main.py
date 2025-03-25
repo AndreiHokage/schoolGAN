@@ -1,3 +1,4 @@
+import os
 import random
 
 import numpy as np
@@ -12,9 +13,11 @@ from discriminatorTeachersFactories.DiscriminatorTeacherAbstractFactory import D
 from discriminatorTeachersModels.DiscriminatorTeacher import DiscriminatorTeacher
 from experiment.SchoolGAN import SchoolGAN
 from generatorStudentsFactories.GeneratorNNFactory import GeneratorNNFactory
+from generatorStudentsModels.GeneratorDCGAN import GeneratorDCGAN
 from generatorStudentsModels.GeneratorStudent import GeneratorStudent
 from generatorStudentsFactories.GeneratorStudentAbstractFactory import GeneratorStudentAbstractFactory
-from utils.tensor_utils import get_device
+from generatorStudentsModels.GeneratorWGAN import GeneratorWGAN
+from utils.tensor_utils import get_device, save_01Elems_as_Image
 from workingDatasets.WorkingDataset import WorkingDataset
 from workingDatasetsFactories.WDatasetMNISTFactory import WDatasetMNISTFactory
 from workingDatasetsFactories.WorkingDatasetAbstractFactory import WorkingDatasetAbstractFactory
@@ -22,6 +25,7 @@ from xmlComponents.DiscTrainAlgoXML import DiscTrainAlgoXML
 from xmlComponents.DiscriminatorTeacherXML import DiscriminatorTeacherXML
 from xmlComponents.GenTrainAlgoXML import GenTrainAlgoXML
 from xmlComponents.GeneratorStudentXML import GeneratorStudentXML
+from xmlComponents.GeneratorTeamXML import GeneratorTeamXML
 from xmlComponents.WorkingDatasetXML import WorkingDatasetXML
 
 
@@ -33,6 +37,12 @@ def readAllGeneratorStudentsConf():
     for generatorStudent in root.findall('generatorTeacher'):
         generatorStudentXML = GeneratorStudentXML(generatorStudent)
         AppInstance().getCatalogueEntities().addGeneratorStudentXML(generatorStudentXML.getId(), generatorStudentXML)
+
+def readAllGeneratorTeamsConf():
+    root = ET.parse('./config_study_group/generatorTeams.xml').getroot()
+    for generatorTeam in root.findall('generatorTeam'):
+        generatorTeamXML = GeneratorTeamXML(generatorTeam)
+        AppInstance().getCatalogueEntities().addGeneratorTeamXML(generatorTeamXML.getId(), generatorTeamXML)
 
 def readAllDiscriminatorTeachersConf():
     root = ET.parse('./config_study_group/discriminatorTeachers.xml').getroot()
@@ -122,10 +132,36 @@ def set_deterministic_seed():
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
+def convert2Tuple(batchSize=(1,)):
+    print("CONVERTCONVET")
+    print(type(batchSize))
+    print(batchSize[0])
+
+def laodngModel():
+    savingGen = GeneratorWGAN(100, 3, 64, 16)
+    savingGen.load_state_dict(torch.load(
+        "/bigdata/userhome/andrei.balanici/Project_Software_Development/schoolGAN/saving_models/generatorLectureClasses/last_Generator_Lecture_Class_1.pth",
+        map_location=lambda storage, loc: storage))
+
+    # savingGen = GeneratorDCGAN(128, 3, 64, 64)
+    # savingGen.load_state_dict(torch.load(
+    #     "/bigdata/userhome/andrei.balanici/Project_Software_Development/schoolGAN/saving_models/generatorLectureClassesTeam_1/last_Generator_Lecture_Class_2.pth",
+    #     map_location=lambda storage, loc: storage))
+
+    savingGen = savingGen.to(device=get_device())
+    savingGen.eval()
+    pathImg = os.path.join(
+        "/bigdata/userhome/andrei.balanici/Project_Software_Development/schoolGAN/results/generatorLectureClasses/Generator_Lecture_Class_2",
+        'counterfeitLast')
+    counterfeitSamples = savingGen.generateCounterfeitSamples(100, normalizing="01")
+    os.makedirs(pathImg, exist_ok=True)
+    save_01Elems_as_Image(counterfeitSamples, pathImg)
+
 if __name__ == '__main__':
     set_deterministic_seed()
     #torch.autograd.set_detect_anomaly(True)
     readAllGeneratorStudentsConf()
+    readAllGeneratorTeamsConf()
     readAllDiscriminatorTeachersConf()
     readAllWorkingDatasets()
     readAllGenTrainAlgos()
@@ -160,7 +196,12 @@ if __name__ == '__main__':
     print(get_device())
     print(torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu")
     print("____END_____")
-    schoolGAN = SchoolGAN('generatorLectureClasses')
+
+    a = torch.rand((10,1,1,1))
+    b = a.view(-1)
+
+
+    schoolGAN = SchoolGAN('runTeam_6')
     schoolGAN.run()
 
 

@@ -59,7 +59,7 @@ class LimeExplanation(ExplanationAlgorithm):
             images = np.transpose(images, (0, 3, 1, 2)) # (L_NUM_BATCHES, H, W ,3) -> (L_NUM_BATCHES, 3, H, W)
         batch = torch.stack([i for i in torch.Tensor(images)], dim=0)
         logits = self.__discriminatorLime(batch)
-        if len(logits) == 3:
+        if len(logits.shape) == 4:
             probs = F.softmax(logits, dim=1).view(-1).unsqueeze(1) # (L_NUM_BATCHES, 1, 1, 1) -> (L_NUM_BATCHES, 1)
         else:
             probs = F.softmax(logits, dim=1) # already was in (L_NUM_BATCHES, 1)

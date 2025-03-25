@@ -4,14 +4,6 @@
         <modelClass>GeneratorNN</modelClass>
         <hyperParameters>
             <hyperParameter>
-                <name>Name_Hyper_Parameter_1</name>
-                <value>Value_Hyper_Parameter_1</value>
-            </hyperParameter>
-            <hyperParameter>
-                <name>Name_Hyper_Parameter_2</name>
-                <value>Value_Hyper_Parameter_2</value>
-            </hyperParameter>
-            <hyperParameter>
                 <name>NOISE_DIM</name>
                 <value>64</value>
             </hyperParameter>
@@ -24,7 +16,7 @@
         <hyperParameters>
             <hyperParameter>
                 <name>NOISE_DIM</name>
-                <value>64</value>
+                <value>128</value>
             </hyperParameter>
             <hyperParameter>
                 <name>FEATURES_G</name>

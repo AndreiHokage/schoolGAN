@@ -14,9 +14,11 @@ class DiscriminatorTeacherAbstractFactory:
 
     def createModel(self, discriminatorTeacherXML: DiscriminatorTeacherXML, experimentLevelParams: Dict[str, ET]) -> DiscriminatorTeacher:
         discriminatorTeacher = self._instantiateModel(discriminatorTeacherXML, experimentLevelParams)
-        for generatorStudentId in discriminatorTeacherXML.getGeneratorStudentsIds():
-            generatorStudent = AppInstance().getCacheModels().getGeneratorStudent(generatorStudentId) # return the same reference, not a copy
-            discriminatorTeacher.addGeneratorStudent(generatorStudent)
+        # for generatorStudentId in discriminatorTeacherXML.getGeneratorStudentsIds():
+        #     generatorStudent = AppInstance().getCacheModels().getGeneratorStudent(generatorStudentId) # return the same reference, not a copy
+        #     discriminatorTeacher.addGeneratorStudent(generatorStudent)
+
+
         # if id(discriminatorTeacher.getGeneratorStudents()[0]) == id(AppInstance().getCacheModels().getGeneratorStudent('Generator_Student_1')):
         #     print("BALALALLALA")
         # else:
