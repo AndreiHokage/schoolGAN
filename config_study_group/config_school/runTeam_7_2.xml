@@ -1,0 +1,52 @@
+<generatorLectureClasses>
+
+    <!-- Team -->
+    <generatorLectureClass>
+        <id>TEAM</id>
+        <isTeam>true</isTeam>
+        <generatorStudentId>Generator_Team_3</generatorStudentId>
+        <discriminatorTeacherId>Discriminator_Teacher_2</discriminatorTeacherId>
+        <workingDataset>Working_Dataset_2</workingDataset>
+        <generatorTrainingAlgorithm>GEN_TRAIN_ALGO_1</generatorTrainingAlgorithm>
+        <discriminatorTrainingAlgorithm>DISC_TRAIN_ALGO_1</discriminatorTrainingAlgorithm>
+        <teamParams>
+            <additionalMembers>
+                <member>
+                    <generatorId>Generator_Student_1</generatorId>
+                    <savingLastPath>saving_models/runTeam_5/last_IND_1.pth</savingLastPath>
+                    <savingBestPath>saving_models/runTeam_5/best_IND_1.pth</savingBestPath>
+                </member>
+                <member>
+                    <generatorId>Generator_Student_2</generatorId>
+                    <savingLastPath>saving_models/runTeam_5/last_IND_2.pth</savingLastPath>
+                    <savingBestPath>saving_models/runTeam_5/best_IND_2.pth</savingBestPath>
+                </member>
+            </additionalMembers>
+        </teamParams>
+        <experimentParams>
+            <epochs>2</epochs>
+            <batchSize>256</batchSize>
+            <glearningRate>2e-4</glearningRate>
+            <dlearningRate>2e-4</dlearningRate>
+            <numChannels>3</numChannels>
+            <imageSize>64</imageSize>
+            <discIterations>1</discIterations>
+            <trainingPercentage>1.0</trainingPercentage>
+            <useExplainability>False</useExplainability>
+            <fakeLabel>0.1</fakeLabel>
+            <realLabel>0.9</realLabel>
+            <loss>BCELoss</loss>
+            <discOptimizer>Adam</discOptimizer>
+            <genOptimizer>Adam</genOptimizer>
+        </experimentParams>
+        <explanationParams>
+            <name>Lime</name>
+            <lowPredictionScore>0.9</lowPredictionScore>
+            <weightExplanationGradient>0.6</weightExplanationGradient>
+        </explanationParams>
+        <evaluationParams>
+            <enableEvaluation>True</enableEvaluation>
+            <numEvaluationSamples>500</numEvaluationSamples>
+        </evaluationParams>
+    </generatorLectureClass>
+</generatorLectureClasses>

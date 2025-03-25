@@ -11,6 +11,7 @@ from catalog.CatalogueEntities import CatalogueEntities
 from discriminatorTeachersFactories.DiscriminatorNNFactory import DiscriminatorNNFactory
 from discriminatorTeachersFactories.DiscriminatorTeacherAbstractFactory import DiscriminatorTeacherAbstractFactory
 from discriminatorTeachersModels.DiscriminatorTeacher import DiscriminatorTeacher
+from experiment.AssessGenerativeProcess import AssessGenerativeProcess
 from experiment.SchoolGAN import SchoolGAN
 from generatorStudentsFactories.GeneratorNNFactory import GeneratorNNFactory
 from generatorStudentsModels.GeneratorDCGAN import GeneratorDCGAN
@@ -200,9 +201,9 @@ if __name__ == '__main__':
     a = torch.rand((10,1,1,1))
     b = a.view(-1)
 
-
-    schoolGAN = SchoolGAN('runTeam_8_2')
-    schoolGAN.run()
+    print("EVALUATING EVALUATING EVALUATING EVALUATING EVALUATING EVALUATING EVALUATING EVALUATING EVALUATING")
+    assessGenerativeProcess = AssessGenerativeProcess('runTeam_8_2', 'TEAM', 90, 1000)
+    assessGenerativeProcess.evaluateLectureClass()
 
 
 

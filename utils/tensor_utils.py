@@ -72,5 +72,18 @@ def resetDirectory(pathDir: str) -> None:
             print(f"Failed to delete the directory: {e}")
     os.makedirs(pathDir, exist_ok=True)
 
+def createSavingDirectory(schoolGANId: str, lectureClassId: str) -> str:
+    saving_model_pth = os.path.join('saving_models', schoolGANId, lectureClassId)
+    os.makedirs(saving_model_pth, exist_ok=True)
+    return saving_model_pth
 
+def createSavingModelPthFile(savingModelDirectoryPath: str, epoch: int) -> str:
+    saving_last_model_path_file = os.path.join(savingModelDirectoryPath, f'last_{epoch}.pth')
+    with open(saving_last_model_path_file, "w") as f:
+        pass
 
+    return saving_last_model_path_file
+
+def joinPth(schoolGANId: str, lectureClassId: str, epoch: int) -> str:
+    saving_model_pth = os.path.join('saving_models', schoolGANId, lectureClassId, f'last_{epoch}.pth')
+    return saving_model_pth

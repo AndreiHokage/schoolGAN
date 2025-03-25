@@ -23,7 +23,8 @@ from generatorStudentsModels.GeneratorNN import GeneratorNN
 from generatorStudentsModels.GeneratorStudent import GeneratorStudent
 from trainingMethods.discriminator.DiscriminatorTrainingAlgorithm import DiscriminatorTrainingAlgorithm
 from trainingMethods.generator.GeneratorTrainingAlgorithm import GeneratorTrainingAlgorithm
-from utils.tensor_utils import get_device, normalise_tensor_uint8, save_01Elems_as_Image, resetDirectory, device
+from utils.tensor_utils import get_device, normalise_tensor_uint8, save_01Elems_as_Image, resetDirectory, device, \
+    createSavingDirectory, createSavingModelPthFile
 from workingDatasets.WorkingDataset import WorkingDataset
 
 
@@ -75,7 +76,7 @@ class LectureGAN:
         self.__setupDirectoriesForSavingModels()
         # Reset the results directories.
         # TO DO: If the running model is just loaded, make a mechanism to skip this step to prevent losing the metrics
-        self.__setupDirectoriesForSavingResults()
+        #self.__setupDirectoriesForSavingResults()
 
     def __setupLoss(self, lossTypeXML: ET) -> None:
         lossType = lossTypeXML.text
@@ -108,15 +109,15 @@ class LectureGAN:
         self.__explanationAlgorithm.setExplanationLog(self.__explanationLog)
 
     def __setupDirectoriesForSavingModels(self):
-        self.__saving_best_model_path = os.path.join('saving_models', self.__schoolGANId)
-        os.makedirs(self.__saving_best_model_path, exist_ok=True)
-        self.__saving_best_model_path_file = os.path.join(self.__saving_best_model_path, 'best_' + self.__lectureClassId + '.pth')
-        with open(self.__saving_best_model_path_file, "w") as f:
-            pass
+        # create the root saving directory where all pth file for a specif model are saved
+        self.__saving_best_model_path = createSavingDirectory(self.__schoolGANId, self.__lectureClassId)
+        # self.__saving_best_model_path_file = os.path.join(self.__saving_best_model_path, 'best_' + self.__lectureClassId + '.pth')
+        # with open(self.__saving_best_model_path_file, "w") as f:
+        #     pass
 
-        self.__saving_last_model_path_file = os.path.join(self.__saving_best_model_path, 'last_' + self.__lectureClassId + '.pth')
-        with open(self.__saving_last_model_path_file, "w") as f:
-            pass
+        # self.__saving_last_model_path_file = os.path.join(self.__saving_best_model_path, 'last_' + self.__lectureClassId + '.pth')
+        # with open(self.__saving_last_model_path_file, "w") as f:
+        #     pass
 
     def getSavedLastModelPath(self) ->str:
         return self.__saving_last_model_path_file
@@ -154,6 +155,7 @@ class LectureGAN:
 
     def __evaluateLectureClass(self) -> None:
 
+        print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< EvaluateLectureClass")
         evaluateLectureGAN = EvaluateLectureGAN()
 
         realSamples = self.__workingDataset.generateRealSamples(self.__NUM_EVAL_SAMPLES)
@@ -232,7 +234,8 @@ class LectureGAN:
                 local_explainable = True
 
             loop = tqdm(loader, leave=True)
-            self.__explanationLog.setEpoch(epoch)
+            if self.__USE_EXPLAINABILITY:
+                self.__explanationLog.setEpoch(epoch)
             mini_generative_loss = float('inf')
             for batch_idx, (real_batch, _) in enumerate(loop):
                 # the last batch can be smaller than the experiment config
@@ -294,16 +297,19 @@ class LectureGAN:
 
                 loop.set_postfix(Epoch=epoch, g_error=g_error.item(), d_error=d_error.item())
 
-        self.__saveGenerativeModelLastEpoch()
-        if self.__ENABLE_EVAL:
-            self.__evaluateLectureClass()
+            if epoch >= 50: # To get rid of the beginning models that generate most of the noisy samples
+                self.__saveGenerativeModelLastEpoch(epoch)
+
+        # if self.__ENABLE_EVAL:
+        #     self.__evaluateLectureClass()
 
     def __saveGenerativeModel(self):
         pass
         #torch.save(self.__generatorStudent.state_dict(), self.__saving_best_model_path_file)
 
-    def __saveGenerativeModelLastEpoch(self):
-        torch.save(self.__generatorStudent.state_dict(), self.__saving_last_model_path_file)
+    def __saveGenerativeModelLastEpoch(self, epoch: int):
+        saving_last_model_path_file = createSavingModelPthFile(self.__saving_best_model_path, epoch)
+        torch.save(self.__generatorStudent.state_dict(), saving_last_model_path_file)
 
     def freeUpLectureClass(self):
         del self.__generatorStudent

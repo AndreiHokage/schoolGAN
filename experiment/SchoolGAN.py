@@ -56,10 +56,8 @@ class SchoolGAN:
                 continue
 
             lectureClassId: str = ganLectureClassXML.getId()
-            saving_best_model_path = os.path.join('saving_models', self.__schoolGANFilename)
-            saving_best_model_path_file = os.path.join(saving_best_model_path, 'best_' + lectureClassId + '.pth')
-            saving_last_model_path_file = os.path.join(saving_best_model_path, 'last_' + lectureClassId + '.pth')
-            if not self.__isAnExistingAndTrainedModel(saving_last_model_path_file):
+            saving_best_model_path = os.path.join('saving_models', self.__schoolGANFilename, lectureClassId)
+            if not self.__isAnExistingAndTrainedModel(saving_best_model_path):
                 generatorStudent = self.__createGeneratorStudent(ganLectureClassXML.getGeneratorStudentId(), ganLectureClassXML.getExperimentParameters())
                 discriminatorTeacher = self.__createDiscriminatorTeacher(ganLectureClassXML.getDiscriminatorTeacherId(), ganLectureClassXML.getExperimentParameters())
                 workingDataset = self.__createWorkingDataset(ganLectureClassXML.getWorkingDatasetId(), ganLectureClassXML.getExperimentParameters())
@@ -78,6 +76,8 @@ class SchoolGAN:
                 print("IMPORT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> : " + saving_best_model_path_file + " ; " + saving_last_model_path_file)
 
             templateGeneratorStudent = self.__createGeneratorStudent(ganLectureClassXML.getGeneratorStudentId(), ganLectureClassXML.getExperimentParameters())
+            saving_best_model_path_file = os.path.join(saving_best_model_path, 'best_.pth') # !!!!! ERROR
+            saving_last_model_path_file = os.path.join(saving_best_model_path, 'last_.pth') # !!!!! ERROR
             self.__reviveGenModelList.append(ReviveGenModel(templateGeneratorStudent,
                                                          saving_last_model_path_file,
                                                          saving_best_model_path_file))
@@ -88,24 +88,33 @@ class SchoolGAN:
                 continue
 
             print("generatorLectureClass is LEADER >>>>>>>>>>>>>>>> Team Generator model run training")
-            # Although it is a generatorTeam, in the lecture class xml conf file the only way we make reference to the generator is through the id.
-            # The id of the generator team is the same with the id of generator student
-            generatorTeam = self.__createGeneratorTeam(ganLectureClassXML, ganLectureClassXML.getExperimentParameters())
-            discriminatorTeacher = self.__createDiscriminatorTeacher(ganLectureClassXML.getDiscriminatorTeacherId(), ganLectureClassXML.getExperimentParameters())
-            workingDataset = self.__createWorkingDataset(ganLectureClassXML.getWorkingDatasetId(), ganLectureClassXML.getExperimentParameters())
-            genTrainingAlgo, genParamsTrainAlgo = self.__instantiateGenTrainingAlgo(ganLectureClassXML.getGenTrainingAlgo())
-            discriminatorTrainingAlgo, discParamsTrainAlgo = self.__instantiateDiscTrainingAlgo(ganLectureClassXML.getDiscTrainingAlgo())
-            explanationAlgorithm = self.__createExplanationAlgorithm(ganLectureClassXML.getExplanationParameters())
+
             lectureClassId: str = ganLectureClassXML.getId()
-            lectureTeamGan = LectureGAN(self.__schoolGANFilename, lectureClassId, generatorTeam, discriminatorTeacher, workingDataset, genTrainingAlgo, discriminatorTrainingAlgo,
-                                    explanationAlgorithm, ganLectureClassXML.getExperimentParameters(), ganLectureClassXML.getExplanationParameters(),
-                                    ganLectureClassXML.getEvaluationParameters(), genParamsTrainAlgo, discParamsTrainAlgo)
+            saving_best_model_path = os.path.join('saving_models', self.__schoolGANFilename, lectureClassId)
+            if not self.__isAnExistingAndTrainedModel(saving_best_model_path):
+                # Although it is a generatorTeam, in the lecture class xml conf file the only way we make reference to the generator is through the id.
+                # The id of the generator team is the same with the id of generator student
+                generatorTeam = self.__createGeneratorTeam(ganLectureClassXML, ganLectureClassXML.getExperimentParameters())
+                discriminatorTeacher = self.__createDiscriminatorTeacher(ganLectureClassXML.getDiscriminatorTeacherId(), ganLectureClassXML.getExperimentParameters())
+                workingDataset = self.__createWorkingDataset(ganLectureClassXML.getWorkingDatasetId(), ganLectureClassXML.getExperimentParameters())
+                genTrainingAlgo, genParamsTrainAlgo = self.__instantiateGenTrainingAlgo(ganLectureClassXML.getGenTrainingAlgo())
+                discriminatorTrainingAlgo, discParamsTrainAlgo = self.__instantiateDiscTrainingAlgo(ganLectureClassXML.getDiscTrainingAlgo())
+                explanationAlgorithm = self.__createExplanationAlgorithm(ganLectureClassXML.getExplanationParameters())
+                lectureTeamGan = LectureGAN(self.__schoolGANFilename, lectureClassId, generatorTeam, discriminatorTeacher, workingDataset, genTrainingAlgo, discriminatorTrainingAlgo,
+                                        explanationAlgorithm, ganLectureClassXML.getExperimentParameters(), ganLectureClassXML.getExplanationParameters(),
+                                        ganLectureClassXML.getEvaluationParameters(), genParamsTrainAlgo, discParamsTrainAlgo)
 
-            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Run BOSSS")
-            lectureTeamGan.runExperiment()
+                print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Run BOSSS")
+                lectureTeamGan.runExperiment()
+            else:
+                print("The team generator " + lectureClassId + " was already trained! Danger of overwriting the existing model! Please take the corresponding actions!")
 
-    def __isAnExistingAndTrainedModel(self, saving_last_model_path_file):
-        return os.path.exists(saving_last_model_path_file)
+    def __isAnExistingAndTrainedModel(self, saving_best_model_path):
+        if os.path.exists(saving_best_model_path):
+            dir_content = os.listdir(saving_best_model_path)
+            if len(dir_content) != 0:
+                return True
+        return False
 
     def __createGeneratorStudent(self, generatorStudentId: str, experimentLevelParams: Dict[str, ET]) -> GeneratorStudent:
         generatorStudentXML = AppInstance().getCatalogueEntities().getGeneratorStudentXMLById(generatorStudentId)
