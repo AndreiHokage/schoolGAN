@@ -33,7 +33,7 @@ class GeneratorTeam(GeneratorStudent):
     '''
     Generates counterfeit samples from multiple approximations of the real distribution of the actual working dataset.
     The counterfeit samples act as an input noise for a generative model like the classical feed input noise
-    Tensor Shape: (self.__BTCH_SIZE, C, H, W)
+    Tensor Shape: (self.__BATCH_SIZE, len(self.__generatorStudents) * C, H, W)
     '''
     def generateNoise(self, batch_size=1) -> torch.Tensor:
         listFakeData = []

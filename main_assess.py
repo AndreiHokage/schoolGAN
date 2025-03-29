@@ -1,5 +1,6 @@
 import os
 import random
+import sys
 
 import numpy as np
 import torch
@@ -159,7 +160,18 @@ def laodngModel():
     save_01Elems_as_Image(counterfeitSamples, pathImg)
 
 if __name__ == '__main__':
+    if len(sys.argv) != 4:
+        print("Error: the id of the config school, the id of the lecture class, the number of samples are needed to run the SchoolGAN")
+        exit(1)
+
     set_deterministic_seed()
+
+    configSchoolId: str = sys.argv[1]
+    configLectureId: str = sys.argv[2]
+    numSamples: int = int(sys.argv[3])
+    print("configSchoolID: ", configSchoolId)
+    print("configLectureId: ", configLectureId)
+    print("numSamples: ", numSamples)
     #torch.autograd.set_detect_anomaly(True)
     readAllGeneratorStudentsConf()
     readAllGeneratorTeamsConf()
@@ -202,8 +214,10 @@ if __name__ == '__main__':
     b = a.view(-1)
 
     print("EVALUATING EVALUATING EVALUATING EVALUATING EVALUATING EVALUATING EVALUATING EVALUATING EVALUATING")
-    assessGenerativeProcess = AssessGenerativeProcess('runTeam_8_2', 'TEAM', 90, 1000)
+    # examples of instantiation: assessGenerativeProcess = AssessGenerativeProcess('runTeam_8_2', 'TEAM', 500)
+    assessGenerativeProcess = AssessGenerativeProcess(configSchoolId, configLectureId, numSamples)
     assessGenerativeProcess.evaluateLectureClass()
+
 
 
 

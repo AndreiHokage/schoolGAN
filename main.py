@@ -1,5 +1,6 @@
 import os
 import random
+import sys
 
 import numpy as np
 import torch
@@ -158,7 +159,16 @@ def laodngModel():
     save_01Elems_as_Image(counterfeitSamples, pathImg)
 
 if __name__ == '__main__':
+
+    if len(sys.argv) != 2:
+        print("Error: the id of the config school is needed to run the SchoolGAN")
+        exit(1)
+
     set_deterministic_seed()
+
+    configSchoolId: str = sys.argv[1]
+    print("configSchoolID: " + configSchoolId)
+
     #torch.autograd.set_detect_anomaly(True)
     readAllGeneratorStudentsConf()
     readAllGeneratorTeamsConf()
@@ -201,7 +211,7 @@ if __name__ == '__main__':
     b = a.view(-1)
 
 
-    schoolGAN = SchoolGAN('runTeam_8_2')
+    schoolGAN = SchoolGAN(configSchoolId)
     schoolGAN.run()
 
 
